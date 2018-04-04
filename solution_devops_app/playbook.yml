@@ -1,0 +1,7 @@
+---
+- name: Deploy devops app
+  hosts: all
+  become: yes
+  roles:
+    - nginx_install
+    - deploy_app
