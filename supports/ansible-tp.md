@@ -3,20 +3,136 @@
 <!-- template: invert -->
 <!-- *template: gaia -->
 
+# Why Infrastructure as Code?
+
+- Larger applications lead to larger deployments:
+	- Repeated operations
+	- Human errors
+	- Tracability
+
+# Why Infrastructure as Code?
+
+- Cloud infrastructure
+-
+- Pet vs Cattle:
+	- Elasticity
+	- Disposable hosts
+
+# Why Infrastructure as Code?
+
+- Reduce infrastructure deployment costs:
+	- More time on added-value rather than repeatition
+
+- Deployment speed:
+	- Automation leads to faster host availability
+
+- Risk reduction:
+	- Fewer manual operations leads to more reliable deployments
+	- Automation increases the update rate
+
+# Why Infrastructure as Code?
+
+- Brings the code toolkit to infrastructure:
+	- Ability to review changes
+	- Reproductibility of a given infrastructure at a given time
+	- Tracability
+
+# Ansible
+
+- Written in Python
+- Extensible via modules and roles
+- Push method
+- Lightweight:
+	- Only a SSH connection is required
+
+# Ansible
+
+- Mostly declarative
+- YAML, YAML everywhere
+	- Like it or hate it :)
+
+# Principles
+
+- Inventory:
+	- Architecture definition
+	- Group division
+
+# Example
+
+		[webserver]
+		pweb01.yourcompany.com
+		pweb02.yourcompany.com
+
+		[middle]
+		pmiddle01.yourcompany.com
+		pmiddle02.yourcompany.com
+
+		[database]
+		pdb01.yourcompany.com
+		pdb02.yourcompany.com
+		pdb03.yourcompany.com
+
+		[database:vars]
+		mongodb_version=3.7.9
+
+# Principles
+
+- Playbook:
+	- Link groups & hosts to roles
+
+# Example
+
+		- hosts: all
+		  roles:
+		    - certificates
+				- node_exporter
+
+		- hosts: database
+		  roles:
+		    - mongodb
+
+		- hosts: webserver
+		  roles:
+		    - nginx
+
+# Principles
+
+- Roles:
+	- Actual operations:
+		- Services to install
+		- Configurations to deploy
+		- Operations to do
+
+# Example
+
+		- name: Ensure MongoDB APT key is declared
+			apt_key:
+				keyserver: keyserver.ubuntu.com
+				id: 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
+
+		- name: Ensure MongoDB repository is present
+		  apt_repository:
+		    repo: deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main
+		    state: present
+
+		- name: Ensure MongoDB is installed
+		  apt:
+		    name: mongodb-org={{ mongodb_version }}
+
 # Ansible Training
 ![center](assets/ansible_logo.png)
 <small>Created by Antoine Barbare ([@antoine_geek](https://twitter.com/antoine_geek))</small>
 
 ---
-# Agenda 
+# Agenda
 
 - Couple of exercices
 
-- Hands on Ansible 
+- Hands on Ansible
 	- Deploy system pre-requites
-	- Deploy application on remote system 
-	
-- Advanced use of Ansible 
+	- Deploy application on remote system
+
+- Advanced use of Ansible
 	- Templating
 	- Variable usage
 
@@ -24,13 +140,13 @@
 # Technical environment
 
 - 1 Ansible bastion
-- 1 VM per user 
-- Access through SSH via login/password 
+- 1 VM per user
+- Access through SSH via login/password
 
 **VM will be destroyed tonight. Code will be available on Github**
 
 ---
-# Get your account 
+# Get your account
 [https://huit.re/devops_lille_ansible](https://lite.framacalc.org/devops_lille_ansible)
 
 Try your access to Ansible Bastion
@@ -46,9 +162,9 @@ ansible01@ansible:~# ssh ansible@ansible<user_number>
 ```
 
 ---
-# Create your inventory file 
+# Create your inventory file
 
-Based on your user number, create your inventory file. 
+Based on your user number, create your inventory file.
 *You can take example on `/etc/ansible/hosts`*
 
 Test your inventory file:
@@ -71,14 +187,14 @@ We want to deploy devops web application on our VMs
 
 ---
 # Deploying a simple app
-Simple HTML landing page 
+Simple HTML landing page
 Served via Nginx Web Server
 
 *#TODO*
 - Create a role to install Nginx web server
-- Create a role to deliver our application 
-- Wrap up roles in a playbook 
-- Deliver on our server 
+- Create a role to deliver our application
+- Wrap up roles in a playbook
+- Deliver on our server
 
 ---
 
@@ -86,8 +202,8 @@ Served via Nginx Web Server
 
 ---
 ### Create your first role and playbook
-- Install Nginx on the server 
-- Start and Enable Nginx at boot 
+- Install Nginx on the server
+- Start and Enable Nginx at boot
 - Wrap up your the role in a playbook
 
 ```
@@ -122,7 +238,7 @@ Try: `ansible-playbook -i inventory playbook.yml`
 ```
 
 ---
-### Solution 
+### Solution
 ```
 #playbook.yml
 ---
@@ -232,3 +348,30 @@ ansible-meetup-app => `/usr/share/nginx/html/ansible-meetup-app/`
 ---
 # Success !
 ![center 240%](assets/success.gif)
+
+# Best practices
+
+- Variables
+	- Variables may be declared about anywhere
+	- Keep it simple and well organized, better stick to:
+		- Inventory
+		- Roles' defaults
+		- Roles' vars
+
+# Best pratices
+
+- Roles
+	- Tasks can be defined at the playbook level
+	- Prefer roles to keep things well organized
+
+# Best practices
+
+- Playbook is not scripting
+	- Dependent tasks is OK from time to time
+	- When it gets more complicated, consider writing a small module
+		- Simple Python, better for tests, readability, and advanced feature (check mode, etc.)
+
+# Go further
+
+- Ansible Tower
+- AWX (Tower upstream)
