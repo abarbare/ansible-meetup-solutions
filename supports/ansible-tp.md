@@ -369,7 +369,7 @@ ansible-meetup-app => `/usr/share/nginx/html/ansible-meetup-app/`
 - Playbook is not scripting
 	- Dependent tasks is OK from time to time
 	- When it gets more complicated, consider writing a small module
-		- Simple Python, better for tests, readability, and advanced feature (check mode, etc.)
+		- Simple Python, better for tests, readability, and advanced features (check mode, etc.)
 
 # Go further
 
