@@ -84,7 +84,7 @@
 
 		- hosts: all
 		  roles:
-		    - certificates
+				- certificates
 				- node_exporter
 
 		- hosts: database
