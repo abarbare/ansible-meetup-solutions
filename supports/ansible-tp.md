@@ -10,6 +10,7 @@
 	- Human errors
 	- Tracability
 
+---
 # Why Infrastructure as Code?
 
 - Cloud infrastructure
@@ -18,6 +19,7 @@
 	- Elasticity
 	- Disposable hosts
 
+---
 # Why Infrastructure as Code?
 
 - Reduce infrastructure deployment costs:
@@ -30,6 +32,7 @@
 	- Fewer manual operations leads to more reliable deployments
 	- Automation increases the update rate
 
+---
 # Why Infrastructure as Code?
 
 - Brings the code toolkit to infrastructure:
@@ -37,6 +40,7 @@
 	- Reproductibility of a given infrastructure at a given time
 	- Tracability
 
+---
 # Ansible
 
 - Written in Python
@@ -45,18 +49,21 @@
 - Lightweight:
 	- Only a SSH connection is required
 
+---
 # Ansible
 
 - Mostly declarative
 - YAML, YAML everywhere
 	- Like it or hate it :)
 
+---
 # Principles
 
 - Inventory:
 	- Architecture definition
 	- Group division
 
+---
 # Example
 
 		[webserver]
@@ -75,11 +82,13 @@
 		[database:vars]
 		mongodb_version=3.7.9
 
+---
 # Principles
 
 - Playbook:
 	- Link groups & hosts to roles
 
+---
 # Example
 
 		- hosts: all
@@ -95,6 +104,7 @@
 		  roles:
 		    - nginx
 
+---
 # Principles
 
 - Roles:
@@ -103,6 +113,7 @@
 		- Configurations to deploy
 		- Operations to do
 
+---
 # Example
 
 		- name: Ensure MongoDB APT key is declared
@@ -119,6 +130,12 @@
 		  apt:
 		    name: mongodb-org={{ mongodb_version }}
 
+		- name: Ensure MongoDB is configured
+		  template:
+		    src: mongod.conf.j2
+		    dest: /etc/mongod.conf
+
+---
 # Ansible Training
 ![center](assets/ansible_logo.png)
 <small>Created by Antoine Barbare ([@antoine_geek](https://twitter.com/antoine_geek))</small>
