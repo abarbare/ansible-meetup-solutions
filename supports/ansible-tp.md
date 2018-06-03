@@ -3,6 +3,12 @@
 <!-- template: invert -->
 <!-- *template: gaia -->
 
+---
+# Ansible Training
+![center](assets/ansible_logo.png)
+
+---
+
 # Why Infrastructure as Code?
 
 - Larger applications lead to larger deployments:
@@ -66,22 +72,23 @@
 ---
 # Example
 
-		[webserver]
-		pweb01.yourcompany.com
-		pweb02.yourcompany.com
+```
+[webserver]
+pweb01.yourcompany.com
+pweb02.yourcompany.com
 
-		[middle]
-		pmiddle01.yourcompany.com
-		pmiddle02.yourcompany.com
+[middle]
+pmiddle01.yourcompany.com
+pmiddle02.yourcompany.com
 
-		[database]
-		pdb01.yourcompany.com
-		pdb02.yourcompany.com
-		pdb03.yourcompany.com
+[database]
+pdb01.yourcompany.com
+pdb02.yourcompany.com
+pdb03.yourcompany.com
 
-		[database:vars]
-		mongodb_version=3.7.9
-
+[database:vars]
+mongodb_version=3.7.9
+```
 ---
 # Principles
 
@@ -91,18 +98,20 @@
 ---
 # Example
 
-		- hosts: all
-		  roles:
-				- certificates
-				- node_exporter
+```
+- hosts: all
+  roles:
+    - certificates
+    - node_exporter
 
-		- hosts: database
-		  roles:
-		    - mongodb
+- hosts: database
+  roles:
+    - mongodb
 
-		- hosts: webserver
-		  roles:
-		    - nginx
+- hosts: webserver
+  roles:
+    - nginx
+```
 
 ---
 # Principles
@@ -115,30 +124,29 @@
 
 ---
 # Example
+```
+- name: Ensure MongoDB APT key is declared
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
 
-		- name: Ensure MongoDB APT key is declared
-			apt_key:
-				keyserver: keyserver.ubuntu.com
-				id: 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
+- name: Ensure MongoDB repository is present
+  apt_repository:
+    repo: deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main
+    state: present
 
-		- name: Ensure MongoDB repository is present
-		  apt_repository:
-		    repo: deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main
-		    state: present
+- name: Ensure MongoDB is installed
+  apt:
+    name: mongodb-org={{ mongodb_version }}
 
-		- name: Ensure MongoDB is installed
-		  apt:
-		    name: mongodb-org={{ mongodb_version }}
-
-		- name: Ensure MongoDB is configured
-		  template:
-		    src: mongod.conf.j2
-		    dest: /etc/mongod.conf
-
+- name: Ensure MongoDB is configured
+  template:
+    src: mongod.conf.j2
+    dest: /etc/mongod.conf
+```
 ---
 # Ansible Training
 ![center](assets/ansible_logo.png)
-<small>Created by Antoine Barbare ([@antoine_geek](https://twitter.com/antoine_geek))</small>
 
 ---
 # Agenda
@@ -175,7 +183,7 @@ user@laptop:~# ssh ansible<user_number>@ansible.barbare.me
 Make sure you have access to your VM
 
 ```
-ansible01@ansible:~# ssh ansible@ansible<user_number>
+ansible0X@ansible:~# ssh ansible@ansible<user_number>
 ```
 
 ---
@@ -366,6 +374,7 @@ ansible-meetup-app => `/usr/share/nginx/html/ansible-meetup-app/`
 # Success !
 ![center 240%](assets/success.gif)
 
+---
 # Best practices
 
 - Variables
@@ -375,11 +384,14 @@ ansible-meetup-app => `/usr/share/nginx/html/ansible-meetup-app/`
 		- Roles' defaults
 		- Roles' vars
 
+---
 # Best pratices
 
 - Roles
 	- Tasks can be defined at the playbook level
 	- Prefer roles to keep things well organized
+
+---
 
 # Best practices
 
@@ -388,7 +400,12 @@ ansible-meetup-app => `/usr/share/nginx/html/ansible-meetup-app/`
 	- When it gets more complicated, consider writing a small module
 		- Simple Python, better for tests, readability, and advanced features (check mode, etc.)
 
+---
 # Go further
 
 - Ansible Tower
 - AWX (Tower upstream)
+
+---
+
+# Thanks
