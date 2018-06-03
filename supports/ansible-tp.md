@@ -1,11 +1,11 @@
 <!-- $theme: gaia -->
 <!-- $size: a4 -->
 <!-- template: invert -->
-<!-- *template: gaia -->
 
----
-# Ansible Training
+# Ansible Code Lab
 ![center](assets/ansible_logo.png)
+<small>[Maxime Wojtczak](https://twitter.com/wjtzk) </small>
+<small>[Antoine Barbare](https://twitter.com/antoine_geek)</small>
 
 ---
 
