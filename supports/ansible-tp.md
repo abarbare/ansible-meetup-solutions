@@ -275,10 +275,12 @@ Try: `ansible-playbook -i inventory playbook.yml`
 ```
 
 ---
-**Check thaht nginx is installed and available**
+
+**Check that nginx is installed and available**
+
 `curl ansible<user_number>.barbare.me`
 
-![center 70%](assets/nginx_home.png)
+![center 50%](assets/nginx_home.png)
 
 ---
 
