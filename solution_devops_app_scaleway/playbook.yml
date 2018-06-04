@@ -1,0 +1,9 @@
+---
+- name: Deploy devops app
+  hosts: localhost
+  environment:
+    SCW_API_KEY: "{{ lookup('env', 'SCW_API_KEY') }}"
+  roles:
+    - get_machine
+    #- nginx_install
+    #- deploy_app

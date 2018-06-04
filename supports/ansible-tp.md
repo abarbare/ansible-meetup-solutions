@@ -154,23 +154,38 @@ mongodb_version=3.7.9
 - Couple of exercices
 
 - Hands on Ansible
+	- Deploy your VM
+	- Deploy your SSH key
 	- Deploy system pre-requites
 	- Deploy application on remote system
 
-- Advanced use of Ansible
-	- Templating
-	- Variable usage
+---
 
+# Ansible installation
+
+![75%](assets/scw.png) 
+
+We'll use ansible devel to use scaleway modules
+
+`
+sudo -H pip install git+git://github.com/ansible/ansible.git@devel
+`
+
+Modules:
+- scaleway_compute
+- scaleway_sshkey
+ 
 ---
 # Technical environment
 
-- 1 Ansible bastion
-- 1 VM per user
-- Access through SSH via login/password
+- 1 VM per user 
+- Access to VM through SSH keys
+- Playbook with dynamic inventory
 
 **VM will be destroyed tonight. Code will be available on Github**
 
 ---
+
 # Get your account
 [https://huit.re/devops_lille_ansible](https://lite.framacalc.org/devops_lille_ansible)
 
