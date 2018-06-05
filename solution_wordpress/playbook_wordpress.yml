@@ -1,0 +1,15 @@
+---
+- name: Deploy nginx reverse proxy
+  hosts: front
+  roles:
+    - nginx_install
+
+- name: Deploy mysql 
+  hosts: back
+  roles:
+    - mysql_install
+
+- name: Deploy wordpress
+  hosts: middle
+  roles:
+    - wordpress_install

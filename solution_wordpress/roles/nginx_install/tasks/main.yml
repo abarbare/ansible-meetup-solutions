@@ -1,0 +1,24 @@
+---
+- name: Install nginx daemon
+  apt:
+    name: nginx 
+    state: present 
+    update_cache: yes
+
+- name: Start nginx and enable it at boot
+  systemd:
+    name: nginx 
+    state: started
+    enabled: yes
+
+- name: update nginx conf
+  copy: 
+    src: nginx.conf
+    dest: /etc/nginx/nginx.conf
+  notify: restart nginx
+
+- name: update nginx wordpress conf
+  template: 
+    src: nginx-wordpress.conf
+    dest: /etc/nginx/conf.d/nginx-wordpress.conf
+  notify: restart nginx
