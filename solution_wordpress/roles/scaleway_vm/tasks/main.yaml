@@ -1,13 +1,13 @@
 ---
 
-- name: create a scaleway servers
+- name: Create front, middle, back scaleway servers
   scaleway_compute:
     name: "{{ item }}"
     state: "{{ state }}"
-    image: e20532c4-1fa0-4c97-992f-436b8d372c07
-    organization: 43a3b6c8-916f-477b-b7ec-ff1898f5fdd9
-    region: par1
-    commercial_type: VC1S
+    image: "{{ image }}"
+    organization: "{{ organization }}"
+    region: "{{ location }}"
+    commercial_type: "{{ commercial_type }}"
   with_items:
     - front-nginx
     - middle-wordpress
