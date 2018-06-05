@@ -202,6 +202,8 @@ user@laptop:~#$ tree
         └── tasks
             └── main.yml
 ```
+[Module Documentation](http://docs.ansible.com/ansible/devel/modules/scaleway_sshkey_module.html#scaleway-sshkey-module)
+
 ---
 ### Solution
 
@@ -224,11 +226,10 @@ user@laptop:~#$ tree
     - scaleway_vm
 ```
 ---
-# Create your Ubuntu virtual machine 
+### Create your Ubuntu VM 
 
 ```
 user@laptop:~#$ tree
-.
 ├── playbook.yml
 └── roles
     └── scaleway_vm
@@ -236,10 +237,13 @@ user@laptop:~#$ tree
             └── main.yml
 ```
 Ubuntu image: `e20532c4-1fa0-4c97-992f-436b8d372c07`
-
 Organization: `43a3b6c8-916f-477b-b7ec-ff1898f5fdd9`
 
+Commercial Type: `VC1S` - Location: `par1`
+
 ⚠️ Specify a custom name (ie not ansible/test/...) ⚠️
+
+[Module Documentation](http://docs.ansible.com/ansible/devel/modules/scaleway_compute_module.html#scaleway-compute-module)
 
 ---
 
@@ -300,7 +304,7 @@ user@laptop:~#:~# ansible -i inventory all -m ping
     "ping": "pong"
 }
 ```
-Make sure to connect with root user with `ansible_user`
+**Make sure to connect with root user with `ansible_user`**
 
 ---
 # Deploying a simple app
@@ -332,7 +336,6 @@ Served via Nginx Web Server
 
 ```
 [ansible01@ansible ~]$ tree
-.
 ├── inventory
 ├── playbook.yml
 └── roles
