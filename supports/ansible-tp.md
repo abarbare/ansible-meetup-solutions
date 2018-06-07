@@ -408,3 +408,4 @@ ansible-meetup-app => `/usr/share/nginx/html/ansible-meetup-app/`
 
 - Ansible Tower
 - AWX (Tower upstream)
+- Ansible Galaxy
