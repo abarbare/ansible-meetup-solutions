@@ -1,1 +1,1 @@
-51.15.235.20 ansible_user=root
+<SCW_IP> ansible_user=root
