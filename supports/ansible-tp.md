@@ -32,7 +32,7 @@
 	- More time on added-value rather than repeatition
 
 - Deployment speed:
-	- Automation leads to faster host availability
+	- Automation leads to faster host readiness
 
 - Risk reduction:
 	- Fewer manual operations leads to more reliable deployments
@@ -45,6 +45,11 @@
 	- Ability to review changes
 	- Reproductibility of a given infrastructure at a given time
 	- Tracability
+
+---
+# Ansible
+- Launched open-source in 2012
+- Acquired by Red Had in 2015
 
 ---
 # Ansible
@@ -93,7 +98,7 @@ mongodb_version=3.7.9
 # Principles
 
 - Playbook:
-	- Link groups & hosts to roles
+	- Links groups & hosts to roles
 
 ---
 # Example
@@ -151,10 +156,8 @@ mongodb_version=3.7.9
     dest: /etc/mongod.conf
 ```
 ---
----
 # Ansible Training
 ![center](assets/ansible_logo.png)
-<small>Created by Antoine Barbare ([@antoine_geek](https://twitter.com/antoine_geek))</small>
 
 ---
 # Agenda
@@ -162,54 +165,176 @@ mongodb_version=3.7.9
 - Couple of exercices
 
 - Hands on Ansible
+	- Deploy your VM
+	- Deploy your SSH key
 	- Deploy system pre-requites
 	- Deploy application on remote system
 
-- Advanced use of Ansible
-	- Templating
-	- Variable usage
+---
+
+# Ansible installation
+
+![75%](assets/scw.png)
+
+We'll use ansible 2.6 to use scaleway modules
+
+`
+sudo -H pip install git+git://github.com/ansible/ansible.git@stable-2.6
+`
+
+Modules:
+- scaleway_compute
+- scaleway_sshkey
 
 ---
 # Technical environment
 
-- 1 Ansible bastion
 - 1 VM per user
-- Access through SSH via login/password
+- Access to VM through SSH keys
 
 **VM will be destroyed tonight. Code will be available on Github**
 
 ---
-# Get your account
-[https://huit.re/devops_lille_ansible](https://lite.framacalc.org/devops_lille_ansible)
+# Get your Scaleway VM
 
-Try your access to Ansible Bastion
+---
 
-```
-user@laptop:~# ssh ansible<user_number>@ansible.barbare.me
-```
-
-Make sure you have access to your VM
+# A playbook for everything
+1st: Deploy your ssh key on Scaleway with scaleway_sshkey
 
 ```
-ansible01@ansible:~# ssh ansible@ansible<user_number>
+user@laptop:~#$ tree
+.
+├── playbook.yml
+└── roles
+    └── scaleway_vm
+        └── tasks
+            └── main.yml
 ```
+[Module Documentation](http://docs.ansible.com/ansible/devel/modules/scaleway_sshkey_module.html#scaleway-sshkey-module)
+
+---
+### Solution
+
+```
+#roles/scaleway/tasks/main.yml
+- name: deploy ssh key to scaleway
+  scaleway_sshkey:
+    ssh_pub_key: "ssh-rsa ..."
+    state: present
+```
+```
+#playbook.yml
+---
+- name: Deploy scaleway virtual machine
+  gather_facts: no
+  hosts: localhost
+  environment:
+    SCW_TOKEN: "{{ lookup('env', 'SCW_TOKEN') }}"
+  roles:
+    - scaleway_vm
+```
+---
+### Create your Ubuntu VM (1)
+
+```
+user@laptop:~#$ tree
+├── playbook.yml
+└── roles
+    └── scaleway_vm
+        └── tasks
+            └── main.yml
+```
+Ubuntu image: `e20532c4-1fa0-4c97-992f-436b8d372c07`
+Organization: `43a3b6c8-916f-477b-b7ec-ff1898f5fdd9`
+
+Commercial Type: `VC1S` - Location: `par1`
+
+⚠️ Specify a custom name (ie not ansible/test/...) ⚠️
+
+[Module Documentation](http://docs.ansible.com/ansible/devel/modules/scaleway_compute_module.html#scaleway-compute-module)
+
+---
+
+### Create your Ubuntu VM (2)
+
+```
+user@laptop:~#$ tree
+├── playbook.yml
+└── roles
+    └── scaleway_vm
+        └── tasks
+            └── main.yml
+```
+Ubuntu image: `6d7aabd0-a0b7-434a-95c8-b40aa3d5b973`
+Organization: `43a3b6c8-916f-477b-b7ec-ff1898f5fdd9`
+
+Commercial Type: `VC1S` - Location: `ams1`
+
+⚠️ Specify a custom name (ie not ansible/test/...) ⚠️
+
+[Module Documentation](http://docs.ansible.com/ansible/devel/modules/scaleway_compute_module.html#scaleway-compute-module)
+
+---
+### Solution
+
+```
+#roles/scaleway/tasks/main.yml
+- name: deploy ssh key to scaleway
+  scaleway_sshkey:
+    ssh_pub_key: "ssh-rsa ..."
+    state: present
+
+- name: create a scaleway server
+  scaleway_compute:
+    name: my_scaleway_server
+    state: running
+    image: e20532c4-1fa0-4c97-992f-436b8d372c07
+    organization: 43a3b6c8-916f-477b-b7ec-ff1898f5fdd9
+    region: par1
+    commercial_type: VC1S
+    tags:
+      - my_specific_tag
+```
+
+---
+
+### Try out your playbook 🚀
+
+As you don't have any server right now, you will launch the playbook on your own machine
+
+```
+user@laptop:~# ansible-playbook playbook.yml
+PLAY [Deploy scaleway virtual machine] **********
+
+TASK [scaleway_vm : deploy ssh key to scaleway] **********
+ok: [localhost]
+
+TASK [scaleway_vm : create a scaleway server] **********
+ok: [localhost]
+
+PLAY RECAP **********
+localhost: ok=2 changed=0 unreachable=0 failed=0
+```
+Relaunch it  Magic ✨✨
 
 ---
 # Create your inventory file
 
-Based on your user number, create your inventory file.
+Get the IP Address related to your instance and create your inventory file.
+
 *You can take example on `/etc/ansible/hosts`*
 
 Test your inventory file:
 
 ```
-ansible01@ansible:~# ansible -i inventory all -m ping -b
-master | SUCCESS => {
+user@laptop:~#:~# ansible -i inventory all -m ping
+51.15.235.20 | SUCCESS => {
     "changed": false,
     "ping": "pong"
 }
 ```
-`-b` option will check the ability to switch root through `sudo`
+**Make sure to connect with root user with `ansible_user`**
 
 ---
 # Deploying a simple app
@@ -234,14 +359,13 @@ Served via Nginx Web Server
 # Nginx role
 
 ---
-### Create your first role and playbook
+### Create a role and modify your playbook
 - Install Nginx on the server
 - Start and Enable Nginx at boot
 - Wrap up your the role in a playbook
 
 ```
 [ansible01@ansible ~]$ tree
-.
 ├── inventory
 ├── playbook.yml
 └── roles
@@ -258,7 +382,7 @@ Try: `ansible-playbook -i inventory playbook.yml`
 #roles/nginx_install/tasks/main.yml
 ---
 - name: Install nginx daemon
-  yum:
+  apt:
     name: nginx
     state: present
     update_cache: yes
@@ -277,16 +401,17 @@ Try: `ansible-playbook -i inventory playbook.yml`
 ---
 - name: Deploy devops app
   hosts: all
-  become: yes
   roles:
     - nginx_install
 ```
 
 ---
-**Check thaht nginx is installed and available**
-`curl ansible<user_number>.barbare.me`
 
-![center 70%](assets/nginx_home.png)
+**Check that nginx is installed and available**
+
+`curl scaleway-server-ip`
+
+![center 30%](assets/nginx_home.png)
 
 ---
 
@@ -296,7 +421,6 @@ Try: `ansible-playbook -i inventory playbook.yml`
 ### Update your roles and playbook
 ```
 [ansible01@ansible ~]$ tree
-.
 ├── inventory
 ├── playbook.yml
 └── roles
@@ -321,12 +445,12 @@ Devops App resources are available online:
 - https://github.com/antoineHC/ansible-meetup-app
 - https://github.com/antoineHC/ansible-meetup-nginx
 
-ansible-meetup-app => `/usr/share/nginx/html/ansible-meetup-app/`
+ansible-meetup-app --> `/usr/share/nginx/html/ansible-meetup-app/`
 
-`nginx.conf` => `/etc/nginx/nginx.conf`
-`nginx-devops.conf` => `/etc/nginx/conf.d/app.conf`
+`nginx.conf` --> `/etc/nginx/nginx.conf`
+`nginx-devops.conf` --> `/etc/nginx/conf.d/app.conf`
 
-*Don't forget to restart nginx after deploy your app*
+*Don't forget to restart nginx with handler after the app deployment*
 
 ---
 ### Solution
@@ -382,6 +506,7 @@ ansible-meetup-app => `/usr/share/nginx/html/ansible-meetup-app/`
 # Success !
 ![center 240%](assets/success.gif)
 
+---
 # Best practices
 
 - Variables
@@ -391,12 +516,14 @@ ansible-meetup-app => `/usr/share/nginx/html/ansible-meetup-app/`
 		- Roles' defaults
 		- Roles' vars
 
+---
 # Best pratices
 
 - Roles
 	- Tasks can be defined at the playbook level
 	- Prefer roles to keep things well organized
 
+---
 # Best practices
 
 - Playbook is not scripting
@@ -404,8 +531,13 @@ ansible-meetup-app => `/usr/share/nginx/html/ansible-meetup-app/`
 	- When it gets more complicated, consider writing a proper module
 		- Simple Python, better for tests, readability, and advanced features (check mode, etc.)
 
+---
 # Go further
 
 - Ansible Tower
 - AWX (Tower upstream)
 - Ansible Galaxy
+
+---
+
+# Thanks

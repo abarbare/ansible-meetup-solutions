@@ -1,0 +1,13 @@
+---
+- name: Deploy scaleway virtual machine
+  gather_facts: no
+  hosts: localhost
+  environment:
+    SCW_TOKEN: "{{ lookup('env', 'SCW_TOKEN') }}"
+  roles:
+    - scaleway_vm
+
+- name: Deploy devops app
+  hosts: 51.15.235.20
+    - nginx_install
+    - deploy_app

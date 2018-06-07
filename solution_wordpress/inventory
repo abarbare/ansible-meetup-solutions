@@ -1,0 +1,8 @@
+[front]
+<SCW_IP> ansible_user=root
+
+[middle]
+<SCW_IP> ansible_user=root
+
+[back]
+<SCW_IP> ansible_user=root

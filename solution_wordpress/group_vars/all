@@ -1,0 +1,7 @@
+---
+wp_db_name: wordpress
+wp_db_user: wordpress
+wp_db_password: W0rdpReSs
+wp_language: fr
+wp_locale: FR
+auto_up_disable: false
