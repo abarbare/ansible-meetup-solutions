@@ -1,7 +1,13 @@
 <!-- $theme: gaia -->
 <!-- $size: a4 -->
 <!-- template: invert -->
-<!-- *template: gaia -->
+
+# Ansible Code Lab
+![center](assets/ansible_logo.png)
+<small>[Maxime Wojtczak](https://twitter.com/wjtzk) </small>
+<small>[Antoine Barbare](https://twitter.com/antoine_geek)</small>
+
+---
 
 # Why Infrastructure as Code?
 
@@ -14,7 +20,7 @@
 # Why Infrastructure as Code?
 
 - Cloud infrastructure
--
+
 - Pet vs Cattle:
 	- Elasticity
 	- Disposable hosts
@@ -66,22 +72,23 @@
 ---
 # Example
 
-		[webserver]
-		pweb01.yourcompany.com
-		pweb02.yourcompany.com
+```ini
+[webserver]
+pweb01.yourcompany.com
+pweb02.yourcompany.com
 
-		[middle]
-		pmiddle01.yourcompany.com
-		pmiddle02.yourcompany.com
+[middle]
+pmiddle01.yourcompany.com
+pmiddle02.yourcompany.com
 
-		[database]
-		pdb01.yourcompany.com
-		pdb02.yourcompany.com
-		pdb03.yourcompany.com
+[database]
+pdb01.yourcompany.com
+pdb02.yourcompany.com
+pdb03.yourcompany.com
 
-		[database:vars]
-		mongodb_version=3.7.9
-
+[database:vars]
+mongodb_version=3.7.9
+```
 ---
 # Principles
 
@@ -91,18 +98,20 @@
 ---
 # Example
 
-		- hosts: all
-		  roles:
-				- certificates
-				- node_exporter
+```yaml
+- hosts: all
+  roles:
+    - certificates
+    - node_exporter
 
-		- hosts: database
-		  roles:
-		    - mongodb
+- hosts: database
+  roles:
+    - mongodb
 
-		- hosts: webserver
-		  roles:
-		    - nginx
+- hosts: webserver
+  roles:
+    - nginx
+```
 
 ---
 # Principles
@@ -115,26 +124,33 @@
 
 ---
 # Example
+```yaml
+- name: Ensure MongoDB APT key is declared
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
+    state: present
 
-		- name: Ensure MongoDB APT key is declared
-			apt_key:
-				keyserver: keyserver.ubuntu.com
-				id: 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
+- name: Ensure MongoDB repository is present
+  apt_repository:
+    repo: deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main
+    state: present
 
-		- name: Ensure MongoDB repository is present
-		  apt_repository:
-		    repo: deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main
-		    state: present
+- name: Ensure MongoDB is installed
+  apt:
+    name: mongodb-org={{ mongodb_version }}
+    state: present
+```
 
-		- name: Ensure MongoDB is installed
-		  apt:
-		    name: mongodb-org={{ mongodb_version }}
-
-		- name: Ensure MongoDB is configured
-		  template:
-		    src: mongod.conf.j2
-		    dest: /etc/mongod.conf
-
+---
+# Example
+```yaml
+- name: Ensure MongoDB is configured
+  template:
+    src: mongod.conf.j2
+    dest: /etc/mongod.conf
+```
+---
 ---
 # Ansible Training
 ![center](assets/ansible_logo.png)
@@ -385,7 +401,7 @@ ansible-meetup-app => `/usr/share/nginx/html/ansible-meetup-app/`
 
 - Playbook is not scripting
 	- Dependent tasks is OK from time to time
-	- When it gets more complicated, consider writing a small module
+	- When it gets more complicated, consider writing a proper module
 		- Simple Python, better for tests, readability, and advanced features (check mode, etc.)
 
 # Go further
