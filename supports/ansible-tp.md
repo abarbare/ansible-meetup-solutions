@@ -226,7 +226,7 @@ user@laptop:~#$ tree
     - scaleway_vm
 ```
 ---
-### Create your Ubuntu VM 
+### Create your Ubuntu VM (1)
 
 ```
 user@laptop:~#$ tree
@@ -240,6 +240,27 @@ Ubuntu image: `e20532c4-1fa0-4c97-992f-436b8d372c07`
 Organization: `43a3b6c8-916f-477b-b7ec-ff1898f5fdd9`
 
 Commercial Type: `VC1S` - Location: `par1`
+
+⚠️ Specify a custom name (ie not ansible/test/...) ⚠️
+
+[Module Documentation](http://docs.ansible.com/ansible/devel/modules/scaleway_compute_module.html#scaleway-compute-module)
+
+---
+
+### Create your Ubuntu VM (2)
+
+```
+user@laptop:~#$ tree
+├── playbook.yml
+└── roles
+    └── scaleway_vm
+        └── tasks
+            └── main.yml
+```
+Ubuntu image: `6d7aabd0-a0b7-434a-95c8-b40aa3d5b973`
+Organization: `43a3b6c8-916f-477b-b7ec-ff1898f5fdd9`
+
+Commercial Type: `VC1S` - Location: `ams1`
 
 ⚠️ Specify a custom name (ie not ansible/test/...) ⚠️
 
