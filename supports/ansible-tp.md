@@ -1,7 +1,13 @@
 <!-- $theme: gaia -->
 <!-- $size: a4 -->
 <!-- template: invert -->
-<!-- *template: gaia -->
+
+# Ansible Code Lab
+![center](assets/ansible_logo.png)
+<small>[Maxime Wojtczak](https://twitter.com/wjtzk) </small>
+<small>[Antoine Barbare](https://twitter.com/antoine_geek)</small>
+
+---
 
 # Why Infrastructure as Code?
 
@@ -14,7 +20,7 @@
 # Why Infrastructure as Code?
 
 - Cloud infrastructure
--
+
 - Pet vs Cattle:
 	- Elasticity
 	- Disposable hosts
@@ -66,22 +72,23 @@
 ---
 # Example
 
-		[webserver]
-		pweb01.yourcompany.com
-		pweb02.yourcompany.com
+```ini
+[webserver]
+pweb01.yourcompany.com
+pweb02.yourcompany.com
 
-		[middle]
-		pmiddle01.yourcompany.com
-		pmiddle02.yourcompany.com
+[middle]
+pmiddle01.yourcompany.com
+pmiddle02.yourcompany.com
 
-		[database]
-		pdb01.yourcompany.com
-		pdb02.yourcompany.com
-		pdb03.yourcompany.com
+[database]
+pdb01.yourcompany.com
+pdb02.yourcompany.com
+pdb03.yourcompany.com
 
-		[database:vars]
-		mongodb_version=3.7.9
-
+[database:vars]
+mongodb_version=3.7.9
+```
 ---
 # Principles
 
@@ -91,18 +98,20 @@
 ---
 # Example
 
-		- hosts: all
-		  roles:
-				- certificates
-				- node_exporter
+```yaml
+- hosts: all
+  roles:
+    - certificates
+    - node_exporter
 
-		- hosts: database
-		  roles:
-		    - mongodb
+- hosts: database
+  roles:
+    - mongodb
 
-		- hosts: webserver
-		  roles:
-		    - nginx
+- hosts: webserver
+  roles:
+    - nginx
+```
 
 ---
 # Principles
@@ -115,30 +124,35 @@
 
 ---
 # Example
+```yaml
+- name: Ensure MongoDB APT key is declared
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
+    state: present
 
-		- name: Ensure MongoDB APT key is declared
-			apt_key:
-				keyserver: keyserver.ubuntu.com
-				id: 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
+- name: Ensure MongoDB repository is present
+  apt_repository:
+    repo: deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main
+    state: present
 
-		- name: Ensure MongoDB repository is present
-		  apt_repository:
-		    repo: deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main
-		    state: present
+- name: Ensure MongoDB is installed
+  apt:
+    name: mongodb-org={{ mongodb_version }}
+    state: present
+```
 
-		- name: Ensure MongoDB is installed
-		  apt:
-		    name: mongodb-org={{ mongodb_version }}
-
-		- name: Ensure MongoDB is configured
-		  template:
-		    src: mongod.conf.j2
-		    dest: /etc/mongod.conf
-
+---
+# Example
+```yaml
+- name: Ensure MongoDB is configured
+  template:
+    src: mongod.conf.j2
+    dest: /etc/mongod.conf
+```
 ---
 # Ansible Training
 ![center](assets/ansible_logo.png)
-<small>Created by Antoine Barbare ([@antoine_geek](https://twitter.com/antoine_geek))</small>
 
 ---
 # Agenda
@@ -146,54 +160,151 @@
 - Couple of exercices
 
 - Hands on Ansible
+	- Deploy your VM
+	- Deploy your SSH key
 	- Deploy system pre-requites
 	- Deploy application on remote system
 
-- Advanced use of Ansible
-	- Templating
-	- Variable usage
+---
+
+# Ansible installation
+
+![75%](assets/scw.png)
+
+We'll use ansible 2.6 to use scaleway modules
+
+`
+sudo -H pip install git+git://github.com/ansible/ansible.git@stable-2.6
+`
+
+Modules:
+
+- scaleway_compute
+- scaleway_sshkey
 
 ---
 # Technical environment
 
-- 1 Ansible bastion
 - 1 VM per user
-- Access through SSH via login/password
+- Access to VM through SSH keys
 
 **VM will be destroyed tonight. Code will be available on Github**
 
 ---
-# Get your account
-[https://huit.re/devops_lille_ansible](https://lite.framacalc.org/devops_lille_ansible)
 
-Try your access to Ansible Bastion
+# Get your Scaleway VM
 
-```
-user@laptop:~# ssh ansible<user_number>@ansible.barbare.me
-```
+---
 
-Make sure you have access to your VM
+# A playbook for everything
+1st: Deploy your ssh key on Scaleway with scaleway_sshkey
 
 ```
-ansible01@ansible:~# ssh ansible@ansible<user_number>
+user@laptop:~#$ tree
+.
+âââ playbook.yml
+âââ roles
+    âââ scaleway_vm
+        âââ tasks
+            âââ main.yml
 ```
+---
+### Solution
+
+```yaml
+#roles/scaleway/tasks/main.yml
+- name: deploy ssh key to scaleway
+  scaleway_sshkey:
+    ssh_pub_key: "ssh-rsa ..."
+    state: present
+```
+```yaml
+#playbook.yml
+---
+- name: Deploy scaleway virtual machine
+  gather_facts: no
+  hosts: localhost
+  environment:
+    SCW_TOKEN: "{{ lookup('env', 'SCW_TOKEN') }}"
+  roles:
+    - scaleway_vm
+```
+---
+# Create your Ubuntu virtual machine
+
+```
+user@laptop:~#$ tree
+.
+├── playbook.yml
+└── roles
+    └── scaleway_vm
+        └── tasks
+            └── main.yml
+```
+Ubuntu image: `e20532c4-1fa0-4c97-992f-436b8d372c07`
+
+Organization: `43a3b6c8-916f-477b-b7ec-ff1898f5fdd9`
+
+Specify a custom name (_ie._ not ansible/test/...) !
+
+---
+
+### Solution
+
+```yaml
+#roles/scaleway/tasks/main.yml
+- name: deploy ssh key to scaleway
+  scaleway_sshkey:
+    ssh_pub_key: "ssh-rsa ..."
+    state: present
+
+- name: create a scaleway server
+  scaleway_compute:
+    name: my_scaleway_server
+    state: running
+    image: e20532c4-1fa0-4c97-992f-436b8d372c07
+    organization: 43a3b6c8-916f-477b-b7ec-ff1898f5fdd9
+    region: par1
+    commercial_type: VC1S
+    tags:
+      - my_specific_tag
+```
+---
+### Try out your playbook
+
+As you don't have any server right now, you will launch the playbook on your own machine
+
+```
+user@laptop:~# ansible-playbook playbook.yml
+PLAY [Deploy scaleway virtual machine] **********
+
+TASK [scaleway_vm : deploy ssh key to scaleway] **********
+ok: [localhost]
+
+TASK [scaleway_vm : create a scaleway server] **********
+ok: [localhost]
+
+PLAY RECAP **********
+localhost: ok=2 changed=0 unreachable=0 failed=0
+```
+Relaunch it, Magic!
 
 ---
 # Create your inventory file
 
-Based on your user number, create your inventory file.
+Get the IP Address related to your instance and create your inventory file.
 *You can take example on `/etc/ansible/hosts`*
 
 Test your inventory file:
 
 ```
-ansible01@ansible:~# ansible -i inventory all -m ping -b
-master | SUCCESS => {
+user@laptop:~#:~# ansible -i inventory all -m ping
+51.15.235.20 | SUCCESS => {
     "changed": false,
     "ping": "pong"
 }
 ```
-`-b` option will check the ability to switch root through `sudo`
+Make sure to connect with root user with `ansible_user`
 
 ---
 # Deploying a simple app
@@ -218,7 +329,7 @@ Served via Nginx Web Server
 # Nginx role
 
 ---
-### Create your first role and playbook
+### Create a role and modify your playbook
 - Install Nginx on the server
 - Start and Enable Nginx at boot
 - Wrap up your the role in a playbook
@@ -238,11 +349,11 @@ Try: `ansible-playbook -i inventory playbook.yml`
 
 ---
 ### Solution
-```
+```yaml
 #roles/nginx_install/tasks/main.yml
 ---
 - name: Install nginx daemon
-  yum:
+  apt:
     name: nginx
     state: present
     update_cache: yes
@@ -256,21 +367,22 @@ Try: `ansible-playbook -i inventory playbook.yml`
 
 ---
 ### Solution
-```
+```yaml
 #playbook.yml
 ---
 - name: Deploy devops app
   hosts: all
-  become: yes
   roles:
     - nginx_install
 ```
 
 ---
-**Check thaht nginx is installed and available**
-`curl ansible<user_number>.barbare.me`
 
-![center 70%](assets/nginx_home.png)
+**Check that nginx is installed and available**
+
+`curl scaleway-server-ip`
+
+![center 30%](assets/nginx_home.png)
 
 ---
 
@@ -285,13 +397,13 @@ Try: `ansible-playbook -i inventory playbook.yml`
 ├── playbook.yml
 └── roles
     ├── deploy_app
-    │   ├── files
-    │   │   ├── nginx.conf
-    │   │   └── nginx-devops.conf
-    │   ├── handlers
-    │   │   └── main.yml
-    │   └── tasks
-    │       └── main.yml
+    │   ├── files
+    │   │   ├── nginx.conf
+    │   │   └── nginx-devops.conf
+    │   ├── handlers
+    │   │   └── main.yml
+    │   ├── tasks
+    │   │   └──  main.yml
     └── nginx_install
         └── tasks
             └── main.yml
@@ -305,12 +417,12 @@ Devops App resources are available online:
 - https://github.com/antoineHC/ansible-meetup-app
 - https://github.com/antoineHC/ansible-meetup-nginx
 
-ansible-meetup-app => `/usr/share/nginx/html/ansible-meetup-app/`
+ansible-meetup-app --> `/usr/share/nginx/html/ansible-meetup-app/`
 
-`nginx.conf` => `/etc/nginx/nginx.conf`
-`nginx-devops.conf` => `/etc/nginx/conf.d/app.conf`
+`nginx.conf` --> `/etc/nginx/nginx.conf`
+`nginx-devops.conf` --> `/etc/nginx/conf.d/app.conf`
 
-*Don't forget to restart nginx after deploy your app*
+*Don't forget to restart nginx with handler after the app deployment*
 
 ---
 ### Solution
@@ -366,6 +478,7 @@ ansible-meetup-app => `/usr/share/nginx/html/ansible-meetup-app/`
 # Success !
 ![center 240%](assets/success.gif)
 
+---
 # Best practices
 
 - Variables
@@ -375,20 +488,29 @@ ansible-meetup-app => `/usr/share/nginx/html/ansible-meetup-app/`
 		- Roles' defaults
 		- Roles' vars
 
+---
 # Best pratices
 
 - Roles
 	- Tasks can be defined at the playbook level
 	- Prefer roles to keep things well organized
 
+---
+
 # Best practices
 
 - Playbook is not scripting
 	- Dependent tasks is OK from time to time
-	- When it gets more complicated, consider writing a small module
+	- When it gets more complicated, consider writing a proper module
 		- Simple Python, better for tests, readability, and advanced features (check mode, etc.)
 
+---
 # Go further
 
 - Ansible Tower
 - AWX (Tower upstream)
+- Ansible Galaxy
+
+---
+
+# Thanks
