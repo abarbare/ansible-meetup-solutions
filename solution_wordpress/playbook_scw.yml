@@ -1,0 +1,15 @@
+---
+
+- name: Manage scaleway virtual machine
+  gather_facts: no
+  hosts: localhost
+  environment:
+    SCW_TOKEN: "{{ lookup('env', 'SCW_TOKEN') }}"
+  vars:
+    state: running
+    image: e20532c4-1fa0-4c97-992f-436b8d372c07
+    organization: 43a3b6c8-916f-477b-b7ec-ff1898f5fdd9
+    commercial_type: VC1S
+    location: par1
+  roles:
+    - scaleway_vm

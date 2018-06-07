@@ -1,4 +1,10 @@
 ---
+- name: install git
+  apt:
+    name: git
+    update_cache: yes
+    state: present
+
 - name: deploy devops app from github
   git:
     repo: https://github.com/antoineHC/ansible-meetup-app

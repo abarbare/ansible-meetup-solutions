@@ -1,0 +1,78 @@
+---
+- name: Install nginx and dependencies
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+  with_items: ["unzip", "nginx"]
+
+- name: Start nginx and enable it at boot
+  systemd:
+    name: nginx 
+    state: started
+    enabled: yes
+
+- name: Update nginx conf
+  copy: 
+    src: nginx.conf
+    dest: /etc/nginx/nginx.conf
+  notify: restart nginx
+
+- name: Update nginx wordpress conf
+  copy: 
+    src: wordpress.conf
+    dest: /etc/nginx/conf.d/wordpress.conf
+  notify: restart nginx
+
+- name: Install PHP Packages
+  apt: 
+    name: "{{ item }}"
+  with_items: ["php7.0-fpm", "php7.0", "php7.0-mysql", "php7.0-gd"]
+
+- name: Detect Existing installation
+  stat: path=/var/www/wordpress
+  register: wp
+
+- name: Download latest Wordpress
+  get_url: 
+    url: https://{{ wp_language }}.wordpress.org/latest-{{ wp_language}}_{{ wp_locale }}.zip 
+    dest: /tmp/wordpress.zip
+
+- name: Unpack Wordpress to /tmp/wordpress
+  unarchive: 
+    copy: no 
+    src: /tmp/wordpress.zip 
+    dest: /tmp/ 
+    creates: /var/www/wordpress
+    owner: www-data 
+    group: www-data
+  when: wp.stat.exists != True
+
+- name: Move /tmp/wordpress to /var/www/wordpress
+  command: 
+    mv /tmp/wordpress /var/www/wordpress
+  when: wp.stat.exists != True
+
+- name: Create Wordpress Salts
+  command: /usr/bin/curl https://api.wordpress.org/secret-key/1.1/salt/
+  register: wp_salt
+
+- name: Install Wordpress config
+  template:
+    src: wp-config.php
+    dest: /var/www/wordpress/wp-config.php
+    owner: www-data
+    group: www-data
+
+- name: Change ownership of WordPress installation
+  file: 
+    path: /var/www/wordpress/ 
+    owner: www-data
+    group: www-data 
+    state: directory 
+    recurse: yes 
+
+- name: Start php-fpm service
+  systemd: 
+    name: php7.0-fpm
+    state: started 
+    enabled: yes

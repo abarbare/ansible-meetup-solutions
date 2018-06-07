@@ -1,0 +1,37 @@
+---
+- name: Install MySQL 
+  apt:
+    name: mysql-server
+    state: present 
+    update_cache: yes
+
+- name: Install MySQL python
+  apt:
+    name: python-mysqldb
+    state: present 
+    update_cache: yes
+
+- name: Enable MySQL
+  systemd: 
+    name: mysql 
+    enabled: yes 
+
+- name: Copy the my.cnf file
+  template: 
+    src: my.cnf
+    dest: /etc/mysql/mysql.conf.d/mysqld.cnf
+  notify:
+   - restart mysql
+
+- name: Initialize Database
+  mysql_db:
+    name: "{{wp_db_name}}"
+    encoding: utf8
+    state: present
+
+- name: Database User
+  mysql_user:
+    name: "{{wp_db_user}}"
+    password: "{{wp_db_password}}"
+    priv: "{{wp_db_name}}.*:ALL"
+    host: "%"

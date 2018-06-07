@@ -1,0 +1,17 @@
+---
+
+- name: deploy ssh key to scaleway 
+  scaleway_sshkey:
+    ssh_pub_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDATQ1yqBewwNP3RwSonkVdNu7U5BzQSV4zjOHqRY0J1pJyrK9x1Hhy5tsOzfSwB9Ih7O4wJnjgFa4wKH9CMrGnnRN+899sllt86pZ/EuEQUDnhZu8KkRTNwD8vRGWhdxNbuINPnsUiHd+hfYj6gvccJRehWUAsyxGIVm1KjtbGWxN1kHO/tb4lAz6LdKaCynlB0/ke7Z22ZpDJuOgtJBTPqum7JlM0tbZ63fN7UD3OkTvi2GLHi9g7kySNXluFMQlqhjdM+J2Mh2EjfQu7NjrxmYaTXo6xye/xS0a8YHTEY+peULfXdZLxng8kXlhy9ZgfERn/moexiUFo9jiTrIaT root@763738b36b29"
+    state: present
+
+- name: create a scaleway server
+  scaleway_compute:
+    name: scw-ansible2
+    state: running
+    image: e20532c4-1fa0-4c97-992f-436b8d372c07
+    organization: 43a3b6c8-916f-477b-b7ec-ff1898f5fdd9
+    region: par1
+    commercial_type: VC1S
+    tags:
+      - ansible2
